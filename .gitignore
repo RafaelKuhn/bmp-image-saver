@@ -1,0 +1,11 @@
+# output
+*.exe
+*.o
+*.out
+# configs
+.vscode
+# generated images
+ppm
+bmp
+*.ppm
+*.bmp
