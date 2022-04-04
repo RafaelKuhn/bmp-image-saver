@@ -1,11 +1,10 @@
-CMD = g++ src/main.cpp -o main.exe
 
 all: compile run
 
 compile:
-	@echo -e "compiling\n"
-	@$(CMD)
+	@echo "[make] compiling"
+	@g++ src/main.cpp -o main.exe
 
 run:
-	@echo -e "running\n"
+	@echo "[make] running"
 	@./main.exe
