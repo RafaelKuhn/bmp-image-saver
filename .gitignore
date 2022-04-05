@@ -33,3 +33,6 @@
 
 # vscode shit
 .vscode
+
+# program specific (bmp files)
+*.bmp
