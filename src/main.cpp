@@ -10,12 +10,7 @@
 
 #include <direct.h> // windows' mkdir
 
-#define COLOR_BYTE_LEN 3
-
-// TODO: remove this mess from here
-using namespace std;
-
-// TYPEDEFS
+// SHORTHAND TYPES
 typedef unsigned int uint;
 typedef unsigned char uchar;
 
@@ -35,7 +30,7 @@ struct Color {
 	}
 };
 
-ostream &operator << (ostream &out, const Color &col)
+std::ostream &operator << (std::ostream &out, const Color &col)
 {
 	out << "[" << (uint)(uchar)col.r << "," << (uint)(uchar)col.g << "," << (uint)(uchar)col.b << "]";
 	return out;
@@ -116,7 +111,7 @@ void write_as_ppm(const char *file_name, Color *data, int width, int height)
 
 	std::string path = folder_name.append("/").append(file_name);
 
-	ofstream file(path, ios_base::binary);
+	std::ofstream file(path, std::ios_base::binary);
 
 	file << "P6" << "\n"; // 2 bytes identifier + 1 byte line feed ("\n" in ascii: (char)10)
 	file << std::to_string(width) << " " << std::to_string(height) << "\n"; // integer_width + space + integer_height  + line feed
@@ -149,7 +144,7 @@ void write_as_bmp(const char* file_name, Color* data, int width, int height)
 
 	std::string path = folder_name.append("/").append(file_name);
 
-	ofstream file(path.data(), ios_base::binary);
+	std::ofstream file(path.data(), std::ios_base::binary);
 
 	if (!file) {
 		std::cout << "file " << file_name << " could not be created!\n";
@@ -221,19 +216,19 @@ void write_as_bmp(const char* file_name, Color* data, int width, int height)
 	file.close();
 }
 
-void write_as_bmp(const char* file_name, unique_ptr<ImageData> &img_data)
+void write_as_bmp(const char* file_name, std::unique_ptr<ImageData> &img_data)
 {
 	write_as_bmp(file_name, img_data->colors, img_data->width(), img_data->height());
 }
 
-unique_ptr<ImageData> read_as_bmp(const char *file_name)
+std::unique_ptr<ImageData> read_as_bmp(const char *file_name)
 {
 	std::string folder_name = std::string("bmp");
 	mkdir(folder_name.data());
 	
 	std::string path = folder_name.append("/").append(file_name);
 
-	ifstream file(path.data(), ios_base::binary);
+	std::ifstream file(path.data(), std::ios_base::binary);
 
 	if (!file) {
 		std::cout << "error: file " << path << " not found!\n";
@@ -261,7 +256,7 @@ unique_ptr<ImageData> read_as_bmp(const char *file_name)
 	std::cout << "reading from \"" << file_name << "\"\n";
 	std::cout << "offset px data: " << offset_px_data << ", width px: " << width << ", height px: " << height << "\n\n";
 
-	unique_ptr<ImageData> img_data = make_unique<ImageData>(width, height);
+	std::unique_ptr<ImageData> img_data = std::make_unique<ImageData>(width, height);
 	
 	for (uint y = 0; y < img_data->height(); ++y) {
 
@@ -283,7 +278,7 @@ unique_ptr<ImageData> read_as_bmp(const char *file_name)
 	return std::move(img_data);
 }
 
-void print_color_data_by_ref(unique_ptr<Color[]> &data, int width, int height)
+void print_color_data_by_ref(std::unique_ptr<Color[]> &data, int width, int height)
 {
 	for (int y = 0; y < height; ++y) {
 		for (int x = 0; x < width; ++x) {
@@ -301,7 +296,7 @@ int main(int argc, char** argv)
 	
 	// create a 240p uv gradient and write it into an image file (bmp/gradient.bmp)
 	{
-		unique_ptr<Color[]> arr = make_unique<Color[]>(height * width);
+		std::unique_ptr<Color[]> arr = std::make_unique<Color[]>(height * width);
 		
 		draw_uv_gradient(arr.get(), width, height);
 		write_as_bmp("gradient.bmp", arr.get(), width, height);
@@ -309,7 +304,7 @@ int main(int argc, char** argv)
 
 	// read the gradient from disc and write it as a copy
 	{
-		unique_ptr<ImageData> data = read_as_bmp("gradient.bmp");
+		std::unique_ptr<ImageData> data = read_as_bmp("gradient.bmp");
 
 		// TODO: do smth with the data
 
@@ -324,7 +319,7 @@ int main(int argc, char** argv)
 
 	// create a 144p circle and write it into an image file
 	{
-		auto img_data = make_unique<ImageData>(width, height);
+		auto img_data = std::make_unique<ImageData>(width, height);
 		
 		Point<int> center = { .x = width/2, .y = height/2 };
 		int radius = height/2;
