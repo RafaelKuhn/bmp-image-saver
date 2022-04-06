@@ -8,3 +8,7 @@ compile:
 run:
 	@echo "[make] running"
 	@./main.exe
+
+clean:
+	@rm -f *.exe
+	@rm -f bmp/*.bmp

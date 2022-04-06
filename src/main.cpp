@@ -1,101 +1,58 @@
-// this doesnt work on Big-endian IBM mainframes lol
+#include <iostream>  // cout
+#include <fstream>   // ofstream
+#include <memory>    // unique_ptr, move?
+ 
+#include <string>    // string, stringstream
+#include <cmath>     // pow
+ 
+#include <direct.h>  // windows' mkdir
+ 
+#include "types.h"   // Color, Point, ImageData
 
-#include <iostream>
-#include <fstream> // ofstream
-#include <memory> // unique_ptr
-#include <type_traits> // move
 
-#include <string> // string, stringstream
-#include <cmath> // pow
+#define DEBUG
 
-#include <direct.h> // windows' mkdir
 
-// SHORTHAND TYPES
-typedef unsigned int uint;
-typedef unsigned char uchar;
-
-// COLOR
-struct Color {
-	char r{0}, g{0}, b{0};
-	
-	Color(): r(0), g(0), b(0) { }
-	Color(int r, int g, int b): r(r), g(g), b(b) { }
-	Color(char r, char g, char b): r(r), g(g), b(b) { }
-	Color(char *bgr_colors_arr) {
-		uint* int_ptr = reinterpret_cast<uint *>(bgr_colors_arr);
-		// file format supposed to be Little-endian
-		r = (char)(*int_ptr >> 8 * 2);
-		g = (char)(*int_ptr >> 8 * 1);
-		b = (char)(*int_ptr >> 8 * 0);
-	}
-};
-
+#ifdef DEBUG
 std::ostream &operator << (std::ostream &out, const Color &col)
 {
 	out << "[" << (uint)(uchar)col.r << "," << (uint)(uchar)col.g << "," << (uint)(uchar)col.b << "]";
 	return out;
 }
-
-// POINT
-template <typename T>
-struct Point {
-	T x;
-	T y;
-};
+#endif
 
 
-class ImageData {
-private:
-	uint _width;
-	uint _height;
-
-public:
-	Color* colors;
-	
-	ImageData() {}
-
-	ImageData(uint width, uint height): _width(width), _height(height)
-	{
-		colors = new Color[width * height];
-		std::cout << "[]image data created, w: " << width << " h: " << height << "\n";
-	}
-
-	~ImageData()
-	{
-		std::cout << "[]image data destroyed \n";
-		delete[] colors;
-	}
-
-	constexpr uint height() const {	return _height; }
-	constexpr uint width() const { return _width; }
-};
-
-// TODO: this throws error when height is 1
 void draw_uv_gradient(Color* output, int width, int height)
 {
+#ifdef DEBUG
 	std::cout << "drawing uv gradient on canvas with width " << width << ", height " << height << "\n\n";
-
+#endif
+	int _height = (height == 1) ? 2 : height;
+	int _width = (width == 1) ? 2 : width;
 	for (int y = 0; y < height; ++y) {
 		for (int x = 0; x < width; ++x) {
-			output[y * width + x] = { (x * 255)/(width-1), (y * 255)/(height-1), 0 };
+			output[y * width + x] = { (x * 255)/(_width-1), (y * 255)/(_height-1), 0 };
 		}
 	}
 }
 
-void draw_circle(Color* &output, Point<int> center, int radius, int width, int height)
+void draw_circle(Color* output, Point<int> center, int radius, int width, int height)
 {
+#ifdef DEBUG
 	std::cout << "drawing circle with radius " << radius << ", center at " << center.x << "," << center.y << "\n\n";
 	std::cout << "on canvas with width " << width << ", height " << height << "\n";
-	
+#endif
 	float radiusf = (float)radius;
 
 	float i, j;
 	for (int y = 0; y < height; ++y) {
 		for (int x = 0; x < width; ++x) {
-			// by summing 0.5, we calculate the distance between the center of the pixel, not the top left corner of it
+			// by summing 0.5, we calculate the distance from the center of the pixel, not the top left corner of it
 			i = x + 0.5f - center.x;
 			j = y + 0.5f - center.y;
-			if (pow(i, 2.0f) + pow(j, 2.0f) < pow(radiusf, 2.0f))
+			
+			// x^2 + y^2 > radius^2
+			if (i*i + j*j < radiusf*radiusf)
 				output[y * width + x] = { 255, 0, 0 };
 
 			else
@@ -104,13 +61,8 @@ void draw_circle(Color* &output, Point<int> center, int radius, int width, int h
 	}
 }
 
-void write_as_ppm(const char *file_name, Color *data, int width, int height)
+void write_as_ppm(const char *path, Color *data, int width, int height)
 {
-	std::string folder_name = std::string("ppm");
-	mkdir(folder_name.data());
-
-	std::string path = folder_name.append("/").append(file_name);
-
 	std::ofstream file(path, std::ios_base::binary);
 
 	file << "P6" << "\n"; // 2 bytes identifier + 1 byte line feed ("\n" in ascii: (char)10)
@@ -124,8 +76,9 @@ void write_as_ppm(const char *file_name, Color *data, int width, int height)
 			file << (char)(color.r) << (char)(color.g) << (char)(color.b);
 		}
 	}
-
-	std::cout << "data saved to \"" << path.data() << "\"\n\n";
+#ifdef DEBUG
+	std::cout << "data saved to \"" << path << "\"\n\n";
+#endif
 	file.close();
 }
 
@@ -137,17 +90,12 @@ void truncate_to_4_byte_little_endian_char_array(int number, unsigned char *outp
 	output[3] = (unsigned char)(number >> 8 * 3);
 }
 
-void write_as_bmp(const char* file_name, Color* data, int width, int height)
+void write_as_bmp(const char* path, Color* data, int width, int height)
 {
-	std::string folder_name = std::string("bmp");
-	mkdir(folder_name.data());
-
-	std::string path = folder_name.append("/").append(file_name);
-
-	std::ofstream file(path.data(), std::ios_base::binary);
+	std::ofstream file(path, std::ios_base::binary);
 
 	if (!file) {
-		std::cout << "file " << file_name << " could not be created!\n";
+		std::cout << "file " << path << " could not be created!\n";
 		return;
 	}
 
@@ -193,12 +141,13 @@ void write_as_bmp(const char* file_name, Color* data, int width, int height)
 	file.write(zeros, 4); // 4 bytes colors in color table
 	file.write(zeros, 4); // 4 bytes important colors ??
 
-
-	std::cout << "writing to \"" << path.data() << "\"\n";
+#ifdef DEBUG
+	std::cout << "writing to \"" << path << "\"\n";
 	std::cout << "width " << width << ", height " << height << ", bytes per row " << width*3 << "\n";
 	std::cout << "padding per row " << pads_len_per_row << " bytes, " <<  "\n";
 	std::cout << "img size " << img_size << " bytes, header size " << header_size << " bytes \n";
 	std::cout << "file size " << header_size << " + " << img_size << " = " << file_size << " bytes\n\n";
+#endif
 
 	for (uint y = 0; y < height; ++y) {
 		for (uint x = 0; x < width; ++x) {
@@ -223,15 +172,10 @@ void write_as_bmp(const char* file_name, std::unique_ptr<ImageData> &img_data)
 
 std::unique_ptr<ImageData> read_as_bmp(const char *file_name)
 {
-	std::string folder_name = std::string("bmp");
-	mkdir(folder_name.data());
-	
-	std::string path = folder_name.append("/").append(file_name);
-
-	std::ifstream file(path.data(), std::ios_base::binary);
+	std::ifstream file(file_name, std::ios_base::binary);
 
 	if (!file) {
-		std::cout << "error: file " << path << " not found!\n";
+		std::cout << "error: file " << file_name << " not found!\n";
 		return nullptr;
 	}
 
@@ -252,9 +196,10 @@ std::unique_ptr<ImageData> read_as_bmp(const char *file_name)
 
 	// TODO: comment here
 	const int pads_len_per_row = (4 - ( ( width * 3) % 4) ) % 4;
-
+#ifdef DEBUG
 	std::cout << "reading from \"" << file_name << "\"\n";
 	std::cout << "offset px data: " << offset_px_data << ", width px: " << width << ", height px: " << height << "\n\n";
+#endif
 
 	std::unique_ptr<ImageData> img_data = std::make_unique<ImageData>(width, height);
 	
@@ -278,6 +223,7 @@ std::unique_ptr<ImageData> read_as_bmp(const char *file_name)
 	return std::move(img_data);
 }
 
+#ifdef DEBUG
 void print_color_data_by_ref(std::unique_ptr<Color[]> &data, int width, int height)
 {
 	for (int y = 0; y < height; ++y) {
@@ -288,29 +234,31 @@ void print_color_data_by_ref(std::unique_ptr<Color[]> &data, int width, int heig
 		std::cout << "\n";
 	}
 }
+#endif
 
 int main(int argc, char** argv)
 {
-	int width = 426;
-	int height = 240;
+	_mkdir("bmp");
+
+	int width = 10;
+	int height = 1;
 	
 	// create a 240p uv gradient and write it into an image file (bmp/gradient.bmp)
 	{
 		std::unique_ptr<Color[]> arr = std::make_unique<Color[]>(height * width);
 		
 		draw_uv_gradient(arr.get(), width, height);
-		write_as_bmp("gradient.bmp", arr.get(), width, height);
+		write_as_bmp("bmp/gradient.bmp", arr.get(), width, height);
 	}
 
 	// read the gradient from disc and write it as a copy
 	{
-		std::unique_ptr<ImageData> data = read_as_bmp("gradient.bmp");
+		std::unique_ptr<ImageData> data = read_as_bmp("bmp/gradient.bmp");
 
 		// TODO: do smth with the data
 
 		if (data) {
-			// write_as_bmp("renpa-copy.bmp", data->colors, data->width(), data->height());
-			write_as_bmp("gradient-copy.bmp", data);
+			write_as_bmp("bmp/gradient-copy.bmp", data);
 		}
 	}
 
@@ -328,5 +276,5 @@ int main(int argc, char** argv)
 		write_as_bmp("circle.bmp", img_data->colors, width, height);
 	}
 
-	std::cout << "\nprogram ended! big success!\n";
+	// std::cout << "\nprogram ended! big success!\n";
 }
