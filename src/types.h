@@ -1,28 +1,32 @@
 #pragma once
 
+#include <iostream>
+
 
 typedef unsigned int uint;
 typedef unsigned char uchar;
-
-
-struct Color {
-	char r{0}, g{0}, b{0};
-	Color(): r(0), g(0), b(0) { }
-	Color(int r, int g, int b): r(r), g(g), b(b) { }
-	Color(char r, char g, char b): r(r), g(g), b(b) { }
-	Color(char *little_endian_3byte_bgr_arr) {
-		uint* int_ptr = reinterpret_cast<uint *>(little_endian_3byte_bgr_arr);
-		r = (char)(*int_ptr >> 8 * 2);
-		g = (char)(*int_ptr >> 8 * 1);
-		b = (char)(*int_ptr >> 8 * 0);
-	};
-};
 
 
 template <typename T>
 struct Point {
 	T x;
 	T y;
+};
+
+
+struct Color {
+	char r{0}, g{0}, b{0};
+
+	Color();
+	Color(int r, int g, int b);
+	Color(char *little_endian_3byte_bgr_arr);
+	
+#ifdef DEBUG_MODE
+	void* operator new(size_t size);
+	void* operator new[](size_t size);
+	void operator delete(void * p, size_t size);
+	void operator delete[](void * p, size_t size);
+#endif
 };
 
 
@@ -35,21 +39,31 @@ public:
 	Color* colors;
 	
 	ImageData() {}
-
-	ImageData(uint width, uint height): _width(width), _height(height) {
-		colors = new Color[width * height];
-#ifdef DEBUG
-		std::cout << "[]image data created, w: " << width << " h: " << height << "\n";
-#endif
-	}
-
-	~ImageData() {
-#ifdef DEBUG
-		std::cout << "[]image data destroyed \n";
-#endif
-		delete[] colors;
-	}
+	ImageData(uint width, uint height);
+	
+	~ImageData();
 
 	constexpr uint height() const {	return _height; }
 	constexpr uint width() const { return _width; }
+
+#ifdef DEBUG_MODE
+	void* operator new(size_t size);
+	void* operator new[](size_t size);
+	void operator delete(void * p, size_t size);
+	void operator delete[](void * p, size_t size);
+#endif
 };
+
+#ifdef DEBUG_MODE
+class MemoryMetric {
+private:
+	MemoryMetric();
+
+public:
+	static MemoryMetric& get_instance();
+	uint bytes = 0;
+	void print_metrics();
+	void allocate_and_print(size_t size);
+	void release_and_print(size_t size);
+};
+#endif
