@@ -1,33 +1,57 @@
-DEBUG ?= 0
-ifeq ($(DEBUG), 1)
-    CPPFLAGS = -Wall -Wextra -pedantic -D DEBUG_MODE
-else
-    CPPFLAGS = -Wall
-endif
+# configure output
+EXECUTABLE = main.exe
+OBJDIR = obj
 
-# CPPFLAGS = -Wall -Wextra -pedantic -D DEBUG_MODE
-# CPPFLAGS = -Wall
+# configure input
+SRCDIR = src
+
+# configure files to be compiled into .r.o (release) or .d.o (debug) objects
+FILES = main.cpp types.cpp bmp.cpp
+
+
+# which compiler and flags
+CC = g++
+CPP_FLAGS = -Wall
+DEBUG_FLAGS = -Wall -Wextra -pedantic -D DEBUG_MODE
+
+OBJS = $(FILES:%.cpp=%.o)
+BIN_OBJS = $(addprefix $(OBJDIR)/, $(OBJS))
+
+RELEASE_OBJS = $(BIN_OBJS:%.o=%.r.o)
+DEBUG_OBJS = $(BIN_OBJS:%.o=%.d.o)
+
+# create ./obj directory if doesnt exist
+$(shell [ -d $(OBJDIR) ] || mkdir $(OBJDIR) )
+
 
 all: main
 
-main: main.o types.o bmp.o
-	@echo "[make] compiling and linking main.exe"
-	g++ $(CPPFLAGS) -o main.exe bmp.o main.o types.o
+# main target
+main: $(RELEASE_OBJS)
+	@echo "[make] linking main objects"
+	$(CC) $(CPP_FLAGS) -o $(EXECUTABLE) $(RELEASE_OBJS)
 
-main.o: src/main.cpp
-	g++ $(CPPFLAGS) -c src/main.cpp -o main.o
+# build objects for main target (first delete debug objects)
+$(OBJDIR)/%.r.o: src/%.cpp
+	@rm -f $(DEBUG_OBJS)
+	$(CC) $(CPP_FLAGS) -c $< -o $@
 
-types.o: src/types.cpp
-	g++ $(CPPFLAGS) -c src/types.cpp -o types.o
 
-bmp.o: src/bmp.cpp
-	g++ $(CPPFLAGS) -c src/bmp.cpp -o bmp.o
+# debug target
+debug: $(DEBUG_OBJS)
+	@echo "[make] linking debug objects"
+	$(CC) $(DEBUG_FLAGS) -o $(EXECUTABLE) $(DEBUG_OBJS)
+
+# build objects for debug target (first delete release objects)
+$(OBJDIR)/%.d.o: src/%.cpp
+	@rm -f $(RELEASE_OBJS)
+	$(CC) $(DEBUG_FLAGS) -c $< -o $@
 
 
 run:
 	@echo "[make] running"
-	@./main.exe
+	@./$(EXECUTABLE)
 
 clean:
-	@rm -f *.o
+	@rm -rf $(OBJDIR)
 	@rm -f *.exe

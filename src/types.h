@@ -1,11 +1,11 @@
 #pragma once
 
-#include <iostream>
-
-
 typedef unsigned int uint;
 typedef unsigned char uchar;
 
+#ifdef DEBUG_MODE
+#include <iostream>
+#endif
 
 template <typename T>
 struct Point {
@@ -43,8 +43,8 @@ public:
 	
 	~ImageData();
 
-	constexpr uint height() const {	return _height; }
-	constexpr uint width() const { return _width; }
+	constexpr uint get_height() const {	return _height; }
+	constexpr uint get_width() const { return _width; }
 
 #ifdef DEBUG_MODE
 	void* operator new(size_t size);

@@ -4,8 +4,6 @@
  
 #include <string>    // string, stringstream, to_string
 
-
-
 #include "types.h"   // Color, Point, ImageData
 #include "bmp.h"     // read_as_bmp, write_as_bmp
 
@@ -129,11 +127,11 @@ int main(int, char**)
 		
 		Point<int> center = { width/2, height/2 };
 		int radius = height/2;
-		draw_circle(img_data->colors, center, radius, img_data->width(), img_data->height());
+		draw_circle(img_data->colors, center, radius, img_data->get_width(), img_data->get_height());
 
 		write_as_bmp("circle.bmp", img_data->colors, width, height);
 	}
 	
-
+	// std::cin.get();
 	cout << "\nprogram ended! big success!\n";
 }

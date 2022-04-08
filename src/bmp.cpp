@@ -1,6 +1,7 @@
 #include "bmp.h"
 
-using std::cout;
+#include <iostream>  // cout
+#include <fstream>   // ofstream
 
 void truncate_to_4_byte_little_endian_char_array(int number, unsigned char *output)
 {
@@ -12,6 +13,8 @@ void truncate_to_4_byte_little_endian_char_array(int number, unsigned char *outp
 
 void write_as_bmp(const char* path, Color* data, uint width, uint height)
 {
+	using std::cout;
+	
 	std::ofstream file(path, std::ios_base::binary);
 	
 	if (!file) {
@@ -88,12 +91,14 @@ void write_as_bmp(const char* path, Color* data, uint width, uint height)
 
 void write_as_bmp(const char* file_name, std::unique_ptr<ImageData> &img_data)
 {
-	write_as_bmp(file_name, img_data->colors, img_data->width(), img_data->height());
+	write_as_bmp(file_name, img_data->colors, img_data->get_width(), img_data->get_height());
 }
 
 
 std::unique_ptr<ImageData> read_as_bmp(const char *file_name)
 {
+	using std::cout;
+	
 	std::ifstream file(file_name, std::ios_base::binary);
 
 	if (!file) {
@@ -127,13 +132,13 @@ std::unique_ptr<ImageData> read_as_bmp(const char *file_name)
 
 	std::unique_ptr<ImageData> img_data = std::make_unique<ImageData>(width, height);
 	
-	for (uint y = 0; y < img_data->height(); ++y) {
+	for (uint y = 0; y < img_data->get_height(); ++y) {
 
 		// seeks start of image data in file
 		int byte_seek_position = offset_px_data + y * width * 3 + pads_len_per_row * y;
 		file.seekg(byte_seek_position);
 
-		for (uint x = 0; x < img_data->width(); ++x) {	
+		for (uint x = 0; x < img_data->get_width(); ++x) {	
 
 			// read 3 bytes (B G R color components)
 			char color_data[3];
