@@ -84,7 +84,6 @@ void write_as_bmp(const char* path, Color* data, uint width, uint height)
 			file << zero;
 		}
 	}
-
 	
 	file.close();
 }

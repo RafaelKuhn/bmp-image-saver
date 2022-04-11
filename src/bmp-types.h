@@ -1,5 +1,6 @@
 #pragma once
 
+// TODO: remove this from here and use uint8_t of <cstdint>
 typedef unsigned int uint;
 typedef unsigned char uchar;
 
@@ -20,7 +21,7 @@ struct Color {
 	Color();
 	Color(int r, int g, int b);
 	Color(char *little_endian_3byte_bgr_arr);
-	
+
 #ifdef DEBUG_MODE
 	void* operator new(size_t size);
 	void* operator new[](size_t size);

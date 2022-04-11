@@ -34,5 +34,7 @@
 # vscode shit
 .vscode
 
-# program specific (bmp files)
+# program specific (bmps, objects and copied-over bmp-lib.h header)
 *.bmp
+obj/
+lib/

@@ -1,57 +1,75 @@
+# TODO: option to "build as library"
+
 # configure output
 EXECUTABLE = main.exe
 OBJDIR = obj
+LIBDIR = lib
+LIB_NAME = bmplib.lib
+LIB_HEADER = bmplib.h
 
 # configure input
 SRCDIR = src
-
 # configure files to be compiled into .r.o (release) or .d.o (debug) objects
-FILES = main.cpp types.cpp bmp.cpp
+# "main" shouldn't be compiled for library
+LIB_FILES = bmp-types.cpp bmp.cpp
+FILES = main.cpp $(LIB_FILES)
 
-
-# which compiler and flags
+# confiure compiler and flags
 CC = g++
 CPP_FLAGS = -Wall
 DEBUG_FLAGS = -Wall -Wextra -pedantic -D DEBUG_MODE
 
-OBJS = $(FILES:%.cpp=%.o)
-BIN_OBJS = $(addprefix $(OBJDIR)/, $(OBJS))
+LIB_HEADERS = $(addprefix $(SRCDIR)/, $(LIB_FILES:%.cpp=%.h))
+LIB_OBJS = $(addprefix $(OBJDIR)/, $(LIB_FILES:%.cpp=%.r.o))
+RELEASE_OBJS = $(addprefix $(OBJDIR)/, $(FILES:%.cpp=%.r.o))
+DEBUG_OBJS = $(addprefix $(OBJDIR)/, $(FILES:%.cpp=%.d.o))
 
-RELEASE_OBJS = $(BIN_OBJS:%.o=%.r.o)
-DEBUG_OBJS = $(BIN_OBJS:%.o=%.d.o)
-
-# create ./obj directory if doesnt exist
+# create obj directory if doesnt exist
 $(shell [ -d $(OBJDIR) ] || mkdir $(OBJDIR) )
 
 
-all: main
+all: main lib
 
 # main target
 main: $(RELEASE_OBJS)
 	@echo "[make] linking main objects"
 	$(CC) $(CPP_FLAGS) -o $(EXECUTABLE) $(RELEASE_OBJS)
 
-# build objects for main target (first delete debug objects)
-$(OBJDIR)/%.r.o: src/%.cpp
-	@rm -f $(DEBUG_OBJS)
-	$(CC) $(CPP_FLAGS) -c $< -o $@
-
-
 # debug target
 debug: $(DEBUG_OBJS)
 	@echo "[make] linking debug objects"
 	$(CC) $(DEBUG_FLAGS) -o $(EXECUTABLE) $(DEBUG_OBJS)
 
-# build objects for debug target (first delete release objects)
+# lib target
+lib: $(LIB_OBJS)
+# this creates lib folder and runs bash script
+# to create library header (combines library headers in one)
+	@[ -d $(OBJDIR) ] || mkdir $(LIBDIR)
+	@./scripts/build-lib-header.sh $(LIBDIR)/$(LIB_HEADER) $(LIB_HEADERS)
+	@echo "[make] archiving library"
+	ar rcs -o $(LIBDIR)/$(LIB_NAME) $(LIB_OBJS)
+
+
+# build objects for release targets (first deletes debug objects)
+$(OBJDIR)/%.r.o: src/%.cpp
+	@rm -f $(DEBUG_OBJS)
+	$(CC) $(CPP_FLAGS) -c $< -o $@
+
+# build objects for debug target (first deletes release objects)
 $(OBJDIR)/%.d.o: src/%.cpp
 	@rm -f $(RELEASE_OBJS)
 	$(CC) $(DEBUG_FLAGS) -c $< -o $@
 
 
 run:
-	@echo "[make] running"
-	@./$(EXECUTABLE)
+	@[ -f $(EXECUTABLE) ] && { \
+		./$(EXECUTABLE); \
+	} || { \
+		echo "[make] executable not found, run 'make main' or 'make debug' first"; \
+	}
 
 clean:
-	@rm -rf $(OBJDIR)
-	@rm -f *.exe
+	rm -rf $(OBJDIR)
+	rm -f *.exe
+	rm -f *.lib
+	rm -f *.bmp

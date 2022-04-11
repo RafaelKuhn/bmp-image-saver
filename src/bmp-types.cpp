@@ -1,4 +1,5 @@
-#include "types.h"
+// TODO: remove this from here and use uint8_t of <cstdint>
+#include "bmp-types.h"
 
 #include <iostream> // cout
 

@@ -1,16 +1,17 @@
-#include <iostream>  // cout
-#include <fstream>   // ofstream
-#include <memory>    // unique_ptr, move?
- 
-#include <string>    // string, stringstream, to_string
+#include <iostream>    // cout
+#include <fstream>     // ofstream
+#include <memory>      // unique_ptr, move?
 
-#include "types.h"   // Color, Point, ImageData
-#include "bmp.h"     // read_as_bmp, write_as_bmp
+#include <string>      // string, stringstream, to_string
 
+#include "bmp-types.h" // Color, Point, ImageData
+#include "bmp.h"       // read_as_bmp, write_as_bmp
 
 using std::cout;
 
 
+// TODO: move to color implementation
+// also, implement ofstream (file) << col || ostream (anything) << col
 #ifdef DEBUG_MODE
 std::ostream &operator << (std::ostream &out, const Color &col)
 {
@@ -94,7 +95,7 @@ void print_color_data_by_ref(std::unique_ptr<Color[]> &data, int width, int heig
 }
 #endif
 
-int main(int, char**)
+int main(int, char*[])
 {	
 	int width = 426;
 	int height = 240;
