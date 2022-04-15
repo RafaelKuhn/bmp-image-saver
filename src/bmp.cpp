@@ -1,7 +1,13 @@
+// TODO: allow reading of alpha values
 #include "bmp.h"
+#include "bmp-types.h"
 
 #include <iostream>  // cout
 #include <fstream>   // ofstream
+
+#ifdef DEBUG_MODE
+	using std::cout;
+#endif
 
 void truncate_to_4_byte_little_endian_char_array(int number, unsigned char *output)
 {
@@ -11,27 +17,30 @@ void truncate_to_4_byte_little_endian_char_array(int number, unsigned char *outp
 	output[3] = (unsigned char)(number >> 8 * 3);
 }
 
-void write_as_bmp(const char* path, Color* data, uint width, uint height)
+void write_as_bmp(const char* file_name, ImageData &img_data)
 {
-	using std::cout;
-	
+	write_as_bmp(file_name, img_data.colors, img_data.get_width(), img_data.get_height());
+}
+
+void write_as_bmp(const char* path, const Color* const data, uint width, uint height)
+{
 	std::ofstream file(path, std::ios_base::binary);
 	
 	if (!file) {
-		cout << "[error] file " << path << " could not be created!\n";
+		std::cout << "[error] file " << path << " could not be created!\n";
 		return;
 	}
 
 	const char zero = (char)0;
 
 	// header: (3 rows * 16 bytes per row) + 6 bytes last row, 16 * 3 + 6 = 54
-	const int header_size = 54;
+	const uint header_size = 54;
 
-	const int pads_len_per_row = (4 - ( ( width * 3) % 4) ) % 4;
-	const int pads_len = pads_len_per_row * height;
+	const uint pads_len_per_row = (4 - ( ( width * 3) % 4) ) % 4;
+	const uint pads_len = pads_len_per_row * height;
 
-	const int img_size = width * height * 3 + pads_len;
-	const int file_size = header_size + img_size;
+	const uint img_size = width * height * 3 + pads_len;
+	const uint file_size = header_size + img_size;
 
 	const char zeros[4] { (char)0, (char)0, (char)0, (char)0 };
 
@@ -64,14 +73,14 @@ void write_as_bmp(const char* path, Color* data, uint width, uint height)
 	file.write(zeros, 4); // 4 bytes colors in color table
 	file.write(zeros, 4); // 4 bytes important colors ??
 
+#ifdef DEBUG_MODE
 	cout << "writing to \"" << path << "\"\n";
 	cout << "width " << width << ", height " << height << "\n";
-#ifdef DEBUG_MODE
 	cout << "bytes per row: " << width*3 << ", padding per row: " << pads_len_per_row << " bytes, " <<  "\n";
 	cout << "img size " << img_size << " bytes, header size " << header_size << " bytes \n";
 	cout << "file size " << header_size << " + " << img_size << " = " << file_size << " bytes\n";
-#endif
 	cout << "\n";
+#endif
 
 	for (uint y = 0; y < height; ++y) {
 		for (uint x = 0; x < width; ++x) {
@@ -80,7 +89,7 @@ void write_as_bmp(const char* path, Color* data, uint width, uint height)
 			file << (char)color.b << (char)color.g << (char)color.r;
 		}
 
-		for (int i = 0; i < pads_len_per_row; ++i) {
+		for (uint32_t i = 0; i < pads_len_per_row; ++i) {
 			file << zero;
 		}
 	}
@@ -88,20 +97,13 @@ void write_as_bmp(const char* path, Color* data, uint width, uint height)
 	file.close();
 }
 
-void write_as_bmp(const char* file_name, std::unique_ptr<ImageData> &img_data)
-{
-	write_as_bmp(file_name, img_data->colors, img_data->get_width(), img_data->get_height());
-}
-
 
 std::unique_ptr<ImageData> read_as_bmp(const char *file_name)
 {
-	using std::cout;
-	
 	std::ifstream file(file_name, std::ios_base::binary);
 
 	if (!file) {
-		cout << "error: file " << file_name << " not found!\n";
+		std::cout << "error: file " << file_name << " not found!\n";
 		return nullptr;
 	}
 
@@ -123,11 +125,11 @@ std::unique_ptr<ImageData> read_as_bmp(const char *file_name)
 	// amount of bytes per width row must be a multiple of four
 	// https://www.desmos.com/calculator/akzk5k0rrv
 	const int pads_len_per_row = (4 - ( ( width * 3) % 4) ) % 4;
-	cout << "reading from \"" << file_name << "\"\n";
 #ifdef DEBUG_MODE
+	cout << "reading from \"" << file_name << "\"\n";
 	cout << "offset px data: " << offset_px_data << ", width px: " << width << ", height px: " << height << "\n";
-#endif
 	cout << "\n";
+#endif
 
 	std::unique_ptr<ImageData> img_data = std::make_unique<ImageData>(width, height);
 	

@@ -1,7 +1,5 @@
-# TODO: option to "build as library"
-
 # configure output
-EXECUTABLE = main.exe
+EXECUTABLE = test.exe
 OBJDIR = obj
 LIBDIR = lib
 LIB_NAME = bmplib.lib
@@ -12,7 +10,7 @@ SRCDIR = src
 # configure files to be compiled into .r.o (release) or .d.o (debug) objects
 # "main" shouldn't be compiled for library
 LIB_FILES = bmp-types.cpp bmp.cpp
-FILES = main.cpp $(LIB_FILES)
+FILES = test.cpp $(LIB_FILES)
 
 # confiure compiler and flags
 CC = g++
@@ -28,10 +26,10 @@ DEBUG_OBJS = $(addprefix $(OBJDIR)/, $(FILES:%.cpp=%.d.o))
 $(shell [ -d $(OBJDIR) ] || mkdir $(OBJDIR) )
 
 
-all: main lib
+all: test lib
 
-# main target
-main: $(RELEASE_OBJS)
+# test target
+test: $(RELEASE_OBJS)
 	@echo "[make] linking main objects"
 	$(CC) $(CPP_FLAGS) -o $(EXECUTABLE) $(RELEASE_OBJS)
 
@@ -45,7 +43,7 @@ lib: $(LIB_OBJS)
 # this creates lib folder and runs bash script
 # to create library header (combines library headers in one)
 	@[ -d $(OBJDIR) ] || mkdir $(LIBDIR)
-	@./scripts/build-lib-header.sh $(LIBDIR)/$(LIB_HEADER) $(LIB_HEADERS)
+	@./scripts/build-lib-header.sh $(LIBDIR) $(LIB_HEADERS)
 	@echo "[make] archiving library"
 	ar rcs -o $(LIBDIR)/$(LIB_NAME) $(LIB_OBJS)
 
@@ -65,11 +63,11 @@ run:
 	@[ -f $(EXECUTABLE) ] && { \
 		./$(EXECUTABLE); \
 	} || { \
-		echo "[make] executable not found, run 'make main' or 'make debug' first"; \
+		echo "[make] executable not found, run 'make test' or 'make debug' first"; \
 	}
 
 clean:
-	rm -rf $(OBJDIR)
+	rm -rf $(OBJDIR)/*.o
 	rm -f *.exe
 	rm -f *.lib
 	rm -f *.bmp

@@ -1,6 +1,5 @@
 #pragma once
 
-// TODO: remove this from here and use uint8_t of <cstdint>
 typedef unsigned int uint;
 typedef unsigned char uchar;
 
@@ -14,7 +13,7 @@ struct Point {
 	T y;
 };
 
-
+/// Data container for rgb color
 struct Color {
 	char r{0}, g{0}, b{0};
 
@@ -30,16 +29,17 @@ struct Color {
 #endif
 };
 
-
+/// Data container for image width, height and pointer to pixel colors
 class ImageData {
 private:
 	uint _width;
 	uint _height;
 
 public:
+	// TODO: could be a shared pointer, but too much overhead for my nooby c++ brain
 	Color* colors;
 	
-	ImageData() {}
+	// ImageData() {} // TODO: should remove this?
 	ImageData(uint width, uint height);
 	
 	~ImageData();
