@@ -1,12 +1,11 @@
-// TODO: remove this from here and use uint8_t of <cstdint>
 #include "bmp-types.h"
 
 #include <iostream> // cout
 
 Color::Color() { }
 Color::Color(int r, int g, int b): r(r), g(g), b(b) { }
-Color::Color(char *little_endian_3byte_bgr_arr) {
-	uint* int_ptr = reinterpret_cast<uint *>(little_endian_3byte_bgr_arr);
+Color::Color(const char* const little_endian_3byte_bgr_arr) {
+	const uint* int_ptr = reinterpret_cast<const uint *>(little_endian_3byte_bgr_arr);
 	r = (char)(*int_ptr >> 8 * 2);
 	g = (char)(*int_ptr >> 8 * 1);
 	b = (char)(*int_ptr >> 8 * 0);
@@ -25,9 +24,9 @@ ImageData::~ImageData() {
 
 #ifdef DEBUG_MODE
 
-// singleton to store memory heap allocation metrics
 MemoryMetric::MemoryMetric() { }
 
+/// Singleton to store memory heap allocation metrics
 MemoryMetric& MemoryMetric::get_instance() {
 	static MemoryMetric _instance;
 	return _instance;

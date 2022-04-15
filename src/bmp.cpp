@@ -84,7 +84,9 @@ void write_as_bmp(const char* path, const Color* const data, uint width, uint he
 
 	for (uint y = 0; y < height; ++y) {
 		for (uint x = 0; x < width; ++x) {
-			int index = y * width + x;
+			// bmp is retarded and stores pixel data bottom-to-top
+			// so we have to do "(height - y - 1)" to invert y
+			int index = (height - y - 1) * width + x;
 			Color color = data[index];
 			file << (char)color.b << (char)color.g << (char)color.r;
 		}
@@ -140,12 +142,14 @@ std::unique_ptr<ImageData> read_as_bmp(const char *file_name)
 		file.seekg(byte_seek_position);
 
 		for (uint x = 0; x < img_data->get_width(); ++x) {	
-
 			// read 3 bytes (B G R color components)
 			char color_data[3];
 			file.read(color_data, 3);
+			
 			Color col(color_data);
-			img_data->colors[y * width + x] = col;
+			// bmp is retarded and stores pixel data bottom-to-top
+			// so we have to do "(height - y - 1)" to invert y
+			img_data->colors[(height - y - 1) * width + x] = col;
 		}
 	}
 

@@ -19,7 +19,7 @@ struct Color {
 
 	Color();
 	Color(int r, int g, int b);
-	Color(char *little_endian_3byte_bgr_arr);
+	Color(const char* const little_endian_3byte_bgr_arr);
 
 #ifdef DEBUG_MODE
 	void* operator new(size_t size);
@@ -36,10 +36,9 @@ private:
 	uint _height;
 
 public:
-	// TODO: could be a shared pointer, but too much overhead for my nooby c++ brain
+	// TODO: could be a shared pointer, but too much overhead for my nooby c++
 	Color* colors;
 	
-	// ImageData() {} // TODO: should remove this?
 	ImageData(uint width, uint height);
 	
 	~ImageData();

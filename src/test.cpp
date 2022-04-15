@@ -34,6 +34,7 @@ void draw_uv_gradient(Color* output, int width, int height)
 	int _height = (height == 1) ? 2 : height;
 	int _width = (width == 1) ? 2 : width;
 	for (int y = 0; y < height; ++y) {
+		cout << y << ": " << (y * 255)/(_height-1) << "\n";
 		for (int x = 0; x < width; ++x) {
 			output[y * width + x] = { (x * 255)/(_width-1), (y * 255)/(_height-1), 0 };
 		}
@@ -80,7 +81,7 @@ int main(int, char*[])
 
 	cout << "[test] reading the gradient from disc and re-writing it as \"gradient-copy.bmp\"\n";
 	{
-		std::unique_ptr<ImageData> data = read_as_bmp("gradient.bmp");
+		std::unique_ptr<ImageData> data = read_as_bmp("photos/renpa.bmp");
 
 		// TODO: do smth with the data
 
