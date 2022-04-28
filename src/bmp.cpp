@@ -27,7 +27,7 @@ void write_as_bmp(const char* path, const Color* const data, uint width, uint he
 	std::ofstream file(path, std::ios_base::binary);
 	
 	if (!file) {
-		std::cout << "[error] file " << path << " could not be created!\n";
+		std::cerr << "[bmp error] file " << path << " could not be created!\n";
 		return;
 	}
 
@@ -74,11 +74,11 @@ void write_as_bmp(const char* path, const Color* const data, uint width, uint he
 	file.write(zeros, 4); // 4 bytes important colors ??
 
 #ifdef DEBUG_MODE
-	cout << "writing to \"" << path << "\"\n";
+	cout << "writing bmp file to \"" << path << "\"\n";
 	cout << "width " << width << ", height " << height << "\n";
 	cout << "bytes per row: " << width*3 << ", padding per row: " << pads_len_per_row << " bytes, " <<  "\n";
 	cout << "img size " << img_size << " bytes, header size " << header_size << " bytes \n";
-	cout << "file size " << header_size << " + " << img_size << " = " << file_size << " bytes\n";
+	cout << "file size " << header_size << " + " << img_size << " = " << file_size << " B | " << file_size/(float)1024 << " KB\n";
 	cout << "\n";
 #endif
 
@@ -105,7 +105,7 @@ std::unique_ptr<ImageData> read_as_bmp(const char *file_name)
 	std::ifstream file(file_name, std::ios_base::binary);
 
 	if (!file) {
-		std::cout << "error: file " << file_name << " not found!\n";
+		std::cerr << "[bmp error] file " << file_name << " not found! returning nullptr\n";
 		return nullptr;
 	}
 
@@ -128,7 +128,7 @@ std::unique_ptr<ImageData> read_as_bmp(const char *file_name)
 	// https://www.desmos.com/calculator/akzk5k0rrv
 	const int pads_len_per_row = (4 - ( ( width * 3) % 4) ) % 4;
 #ifdef DEBUG_MODE
-	cout << "reading from \"" << file_name << "\"\n";
+	cout << "reading bmp file from \"" << file_name << "\"\n";
 	cout << "offset px data: " << offset_px_data << ", width px: " << width << ", height px: " << height << "\n";
 	cout << "\n";
 #endif

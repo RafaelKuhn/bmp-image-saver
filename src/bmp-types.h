@@ -7,12 +7,6 @@ typedef unsigned char uchar;
 #include <iostream>
 #endif
 
-template <typename T>
-struct Point {
-	T x;
-	T y;
-};
-
 /// Data container for rgb color
 struct Color {
 	char r{0}, g{0}, b{0};

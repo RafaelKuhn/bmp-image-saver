@@ -1,14 +1,13 @@
 # configure output
 EXECUTABLE = test.exe
-OBJDIR = obj
-LIBDIR = lib
+OBJ_DIR = obj
+LIB_DIR = lib
 LIB_NAME = bmplib.lib
-LIB_HEADER = bmplib.h
 
 # configure input
 SRCDIR = src
 # configure files to be compiled into .r.o (release) or .d.o (debug) objects
-# "main" shouldn't be compiled for library
+# "test.cpp" shouldn't be compiled for library
 LIB_FILES = bmp-types.cpp bmp.cpp
 FILES = test.cpp $(LIB_FILES)
 
@@ -18,12 +17,15 @@ CPP_FLAGS = -Wall
 DEBUG_FLAGS = -Wall -Wextra -pedantic -D DEBUG_MODE
 
 LIB_HEADERS = $(addprefix $(SRCDIR)/, $(LIB_FILES:%.cpp=%.h))
-LIB_OBJS = $(addprefix $(OBJDIR)/, $(LIB_FILES:%.cpp=%.r.o))
-RELEASE_OBJS = $(addprefix $(OBJDIR)/, $(FILES:%.cpp=%.r.o))
-DEBUG_OBJS = $(addprefix $(OBJDIR)/, $(FILES:%.cpp=%.d.o))
+LIB_OBJS = $(addprefix $(OBJ_DIR)/, $(LIB_FILES:%.cpp=%.r.o))
+LIB_DEBUG_OBJS = $(addprefix $(OBJ_DIR)/, $(LIB_FILES:%.cpp=%.d.o))
+
+RELEASE_OBJS = $(addprefix $(OBJ_DIR)/, $(FILES:%.cpp=%.r.o))
+DEBUG_OBJS = $(addprefix $(OBJ_DIR)/, $(FILES:%.cpp=%.d.o))
+
 
 # create obj directory if doesnt exist
-$(shell [ -d $(OBJDIR) ] || mkdir $(OBJDIR) )
+$(shell [ -d $(OBJ_DIR) ] || mkdir $(OBJ_DIR) )
 
 
 all: test lib
@@ -41,20 +43,26 @@ debug: $(DEBUG_OBJS)
 # lib target
 lib: $(LIB_OBJS)
 # this creates lib folder and runs bash script
-# to create library header (combines library headers in one)
-	@[ -d $(OBJDIR) ] || mkdir $(LIBDIR)
-	@./scripts/build-lib-header.sh $(LIBDIR) $(LIB_HEADERS)
+	@[ -d $(LIB_DIR) ] || mkdir $(LIB_DIR)
+	@./scripts/build-lib-header.sh $(LIB_DIR) $(LIB_HEADERS)
 	@echo "[make] archiving library"
-	ar rcs -o $(LIBDIR)/$(LIB_NAME) $(LIB_OBJS)
+	ar rcs -o $(LIB_DIR)/$(LIB_NAME) $(LIB_OBJS)
+
+lib-debug: $(LIB_DEBUG_OBJS)
+# this creates lib folder and copy-paste headers as-is
+	@[ -d $(LIB_DIR) ] || mkdir $(LIB_DIR)
+	@cp $(LIB_HEADERS) $(LIB_DIR)
+# @echo "[make] archiving library"
+	ar rcs -o $(LIB_DIR)/$(LIB_NAME) $(LIB_DEBUG_OBJS)
 
 
 # build objects for release targets (first deletes debug objects)
-$(OBJDIR)/%.r.o: src/%.cpp
+$(OBJ_DIR)/%.r.o: src/%.cpp
 	@rm -f $(DEBUG_OBJS)
 	$(CC) $(CPP_FLAGS) -c $< -o $@
 
 # build objects for debug target (first deletes release objects)
-$(OBJDIR)/%.d.o: src/%.cpp
+$(OBJ_DIR)/%.d.o: src/%.cpp
 	@rm -f $(RELEASE_OBJS)
 	$(CC) $(DEBUG_FLAGS) -c $< -o $@
 
@@ -67,7 +75,8 @@ run:
 	}
 
 clean:
-	rm -rf $(OBJDIR)/*.o
+	rm -rf $(OBJ_DIR)
+	rm -rf $(LIB_DIR)
 	rm -f *.exe
 	rm -f *.lib
 	rm -f *.bmp

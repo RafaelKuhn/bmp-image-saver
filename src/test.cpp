@@ -10,19 +10,21 @@
 using std::cout;
 
 
-// TODO: move to color implementation
-// also, implement ofstream (file) << col || ostream (anything) << col
+template <typename T>
+struct Point {
+	T x;
+	T y;
+};
+
+
+
+// use this to print a color directly, via "cout << color;"
 #ifdef DEBUG_MODE
 std::ostream &operator << (std::ostream &out, const Color &col)
 {
 	out << "[" << (uint)(uchar)col.r << "," << (uint)(uchar)col.g << "," << (uint)(uchar)col.b << "]";
 	return out;
 }
-// std::ofstream &operator << (std::ostream &out, const Color &col)
-// {
-// 	out << "[" << (uint)(uchar)col.r << "," << (uint)(uchar)col.g << "," << (uint)(uchar)col.b << "]";
-// 	return out;
-// }
 #endif
 
 
@@ -34,14 +36,13 @@ void draw_uv_gradient(Color* output, int width, int height)
 	int _height = (height == 1) ? 2 : height;
 	int _width = (width == 1) ? 2 : width;
 	for (int y = 0; y < height; ++y) {
-		cout << y << ": " << (y * 255)/(_height-1) << "\n";
 		for (int x = 0; x < width; ++x) {
 			output[y * width + x] = { (x * 255)/(_width-1), (y * 255)/(_height-1), 0 };
 		}
 	}
 }
 
-void draw_circle(Color* output, Point<int> center, int radius, int width, int height)
+void draw_circle(Color* output, const Point<int> center, int radius, int width, int height)
 {
 #ifdef DEBUG_MODE
 	cout << "drawing circle with radius " << radius << ", center at " << center.x << "," << center.y << "\n\n";
@@ -81,9 +82,9 @@ int main(int, char*[])
 
 	cout << "[test] reading the gradient from disc and re-writing it as \"gradient-copy.bmp\"\n";
 	{
-		std::unique_ptr<ImageData> data = read_as_bmp("photos/renpa.bmp");
+		std::unique_ptr<ImageData> data = read_as_bmp("gradiente.bmp");
 
-		// TODO: do smth with the data
+		// could do smth with the data here
 
 		if (data) {
 			write_as_bmp("gradient-copy.bmp", *data);
@@ -93,7 +94,7 @@ int main(int, char*[])
 	width  = 256;
 	height = 144;
 
-	cout << "[test] creating a 144p circle and writing it into \"circle.bmp\"";
+	cout << "[test] creating a 144p circle and writing it into \"circle.bmp\"\n";
 	{
 		auto img_data = std::make_unique<ImageData>(width, height);
 		

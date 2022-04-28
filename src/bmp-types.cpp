@@ -1,6 +1,8 @@
 #include "bmp-types.h"
 
+#ifdef DEBUG_MODE
 #include <iostream> // cout
+#endif
 
 Color::Color() { }
 Color::Color(int r, int g, int b): r(r), g(g), b(b) { }
@@ -33,16 +35,16 @@ MemoryMetric& MemoryMetric::get_instance() {
 }
 
 void MemoryMetric::print_metrics() {
-	std::cout << "[memory] in use: " << bytes << " B | " << bytes/1024 << " KB\n";
+	std::cout << "[bmp debug] heap memory in use: " << bytes << " B | " << bytes/1024 << " KB\n";
 }
 
 void MemoryMetric::allocate_and_print(size_t size) {
 	bytes += size;
-	std::cout << "[memory] in use: " << bytes/1024 << " KB (" << bytes << "B), allocated " << size << " B | " << size/1024 << " KB \n";
+	std::cout << "[bmp debug] heap memory in use: " << bytes << " B | " << bytes/1024 << " KB, allocated " << size << " B | " << size/1024 << " KB \n";
 }
 void MemoryMetric::release_and_print(size_t size) {
 	bytes -= size;
-	std::cout << "[memory] in use: " << bytes/1024 << " KB (" << bytes << "B), released " << size << " B | " << size/1024 << " KB\n";
+	std::cout << "[bmp debug] heap memory in use: " << bytes << " B | " << bytes/1024 << " KB, released " << size << " B | " << size/1024 << " KB\n";
 }
 
 
@@ -67,7 +69,6 @@ void Color::operator delete[](void *p, size_t size) {
 	MemoryMetric::get_instance().release_and_print(size);
 	free(p);
 }
-
 
 // override heap allocation methods for ImageData
 void* ImageData::operator new(size_t size) {
