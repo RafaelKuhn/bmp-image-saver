@@ -8,7 +8,7 @@ LIB_NAME = bmplib.lib
 SRCDIR = src
 # configure files to be compiled into .r.o (release) or .d.o (debug) objects
 # "test.cpp" shouldn't be compiled for library
-LIB_FILES = bmp-types.cpp bmp.cpp
+LIB_FILES = types.cpp bmp.cpp
 FILES = test.cpp $(LIB_FILES)
 
 # confiure compiler and flags
