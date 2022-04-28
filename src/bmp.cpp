@@ -1,6 +1,6 @@
 // TODO: allow reading of alpha values
 #include "bmp.h"
-#include "bmp-types.h"
+#include "types.h"
 
 #include <iostream>  // cout
 #include <fstream>   // ofstream
