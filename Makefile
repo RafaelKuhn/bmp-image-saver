@@ -3,6 +3,7 @@ EXECUTABLE = test.exe
 OBJ_DIR = obj
 LIB_DIR = lib
 LIB_NAME = bmplib.lib
+DEBUG_LIB_NAME = bmplib.lib
 
 # configure input
 SRCDIR = src
@@ -53,7 +54,7 @@ lib-debug: $(LIB_DEBUG_OBJS)
 	@[ -d $(LIB_DIR) ] || mkdir $(LIB_DIR)
 	@cp $(LIB_HEADERS) $(LIB_DIR)
 # @echo "[make] archiving library"
-	ar rcs -o $(LIB_DIR)/$(LIB_NAME) $(LIB_DEBUG_OBJS)
+	ar rcs -o $(LIB_DIR)/$(DEBUG_LIB_NAME) $(LIB_DEBUG_OBJS)
 
 
 # build objects for release targets (first deletes debug objects)
