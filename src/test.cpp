@@ -82,7 +82,7 @@ int main(int, char*[])
 
 	cout << "[test] reading the gradient from disc and re-writing it as \"gradient-copy.bmp\"\n";
 	{
-		std::unique_ptr<ImageData> data = read_as_bmp("gradiente.bmp");
+		std::unique_ptr<ImageData> data = read_as_bmp("gradient.bmp");
 
 		// could do smth with the data here
 

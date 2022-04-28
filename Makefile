@@ -3,7 +3,7 @@ EXECUTABLE = test.exe
 OBJ_DIR = obj
 LIB_DIR = lib
 LIB_NAME = bmplib.lib
-DEBUG_LIB_NAME = bmplib.lib
+DEBUG_LIB_NAME = bmplib_debug.lib
 
 # configure input
 SRCDIR = src
