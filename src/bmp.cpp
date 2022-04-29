@@ -17,7 +17,7 @@ void truncate_to_4_byte_little_endian_char_array(int number, unsigned char *outp
 	output[3] = (unsigned char)(number >> 8 * 3);
 }
 
-void write_as_bmp(const char* file_name, ImageData &img_data)
+void write_as_bmp(const char* file_name, const ImageData &img_data)
 {
 	write_as_bmp(file_name, img_data.colors, img_data.get_width(), img_data.get_height());
 }
